@@ -19,14 +19,14 @@ async def create_pool(loop, **kw):
         user=kw['user'],
         password=kw['password'],
         db=kw['db'],
-        charset=kw.get('charset', 'utf-8'),
+        charset=kw.get('charset', 'utf8'),
         autocommit=kw.get('autocommit', 'True'),
         maxsize=kw.get('maxsize', 10),
         minsize=kw.get('minsize', 1),
         loop=loop
     )
 
-
+#类内的查询方法调用此方法
 async def select(sql, args, size=None):
     log(sql, args)
     global __pool
@@ -40,7 +40,7 @@ async def select(sql, args, size=None):
         logging.info('rows returned:%s' % len(rs))
         return rs
 
-
+#类内的保存，更新，删除等调用此方法
 async def execute(sql, args, autocommit=True):
     log(sql)
     async with __pool.get() as conn:
@@ -55,7 +55,7 @@ async def execute(sql, args, autocommit=True):
         except BaseException as e:
             if not autocommit:
                 await conn.rollback()
-            raise e
+            raise
 
         return affected
 
@@ -111,14 +111,14 @@ class ModelMetaclass(type):
             return type.__new__(cls, name, bases, attrs)
         tableName = attrs.get('__table__', None) or name
         logging.info('found model:%s (table:%s)' % (name, tableName))
-        mappings = dict()
-        fields = []
+        mappings = dict()#存放列名：数据
+        fields = []#对应数据库fields，此为列名
         primaryKey = None
         for k, v in attrs.items():
             if isinstance(v, Field):
                 logging.info('  found mapping:%s==>%s' % (k, v))
                 mappings[k] = v
-                if v.primary_key:
+                if v.primary_key:#主键单独存放，非主键列名存入fields
                     if primaryKey:
                         raise StandardError(
                             'Duplicate primary key for field:%s' % k)
@@ -127,13 +127,13 @@ class ModelMetaclass(type):
                     fields.append(k)
         if not primaryKey:
             raise StandardError('primary key not found.')
-        for k in mappings.keys():
+        for k in mappings.keys():#将类的对应属性移除，否则实例属性会覆盖类属性，可能造成运行错误
             attrs.pop(k)
-        escaped_fields = list(map(lambda f: '`%s`' % f, fields))
+        escaped_fields = list(map(lambda f: '`%s`' % f, fields))#用``将fields装饰起来
         attrs['__mappings__'] = mappings
         attrs['__table__'] = tableName
         attrs['__primary_key__'] = primaryKey
-        attrs['__field__'] = fields
+        attrs['__fields__'] = fields
         attrs['__select__'] = 'select `%s`, %s from `%s`' % (
             primaryKey, ', '.join(escaped_fields), tableName)
         attrs['__insert__'] = 'insert into `%s` (%s, `%s`) values (%s)' % (tableName, ', '.join(
@@ -163,9 +163,9 @@ class Model(dict, metaclass=ModelMetaclass):
 
     def getValueOrDefault(self, key):
         value = getattr(self, key, None)
-        if value is None:
+        if value is None:#不定义主键时value为None，models实例化时通过default函数产生一个id作为主键
             field = self.__mappings__[key]
-            if field.default is not None:
+            if field.default is not None:#计算default对应函数
                 value = field.default() if callable(field.default) else field.default
                 logging.debug('using default value for %s:%s' %
                               (key, str(value)))
