@@ -5,6 +5,9 @@ import inspect
 def f(a, *b, c, d='t', **kw):
     pass
 
+s=inspect.signature(f)
+print('s:'+str(s))
+
 p=inspect.signature(f).parameters
 
 for name, param in p.items():
@@ -19,6 +22,8 @@ for name, param in p.items():
 输出：
 
 ```python
+s:<Signature (a, *b, c, d='t', **kw)>
+
 a a
 a:POSITIONAL_OR_KEYWORD			#位置参数
 a:<class 'inspect._empty'>
