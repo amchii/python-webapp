@@ -128,7 +128,7 @@ class RequestHandler(object):
             kw = dict(**request.match_info)
         else:
             if not self._has_var_kw_arg and self._named_kw_args:
-                # 删除所有非命名关键字参数
+                # 如果函数中没有关键字参数而有命名关键字参数，只保留后者
                 copy = dict()
                 for name in self._named_kw_args:
                     if name in kw:
@@ -153,3 +153,50 @@ class RequestHandler(object):
             return r
         except APIError as e:
             return dict(error=e.error, data=e.data, message=e.message)
+
+
+def add_static(app):
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static')
+    app.router.add_static('/static/', path)
+    logging.info('add static %s=>%s' % ('/static/', path))
+
+
+def add_route(app, fn):
+    '''
+    注册url处理函数
+    检查函数并将其转换为协程
+    '''
+    method = getattr(fn, '__method__', None)
+    path = getattr(fn, '__route__', None)
+    if path is None or method is None:
+        raise ValueError('@get or @post not defined in %s.' % str(fn))
+    if not asyncio.iscoroutinefunction(fn) and not inspect.isgeneratorfunction(fn):
+        # Return True if func is a decorated coroutine function.
+        # Return true if the object is a user-defined generator function.
+        fn = asyncio.coroutine(fn)
+        logging.info('add route %s %s => %s(%s)' % (
+            method, path, fn.__name__, ', '.join(inspect.signature(fn).parameters.keys())))
+        app.router.add_route(method, path, RequestHandler(app, fn))
+
+
+def add_routes(app, module_name: str):
+    '''
+    批量注册url处理函数
+    '''
+    n = module_name.rfind('.')
+    if n == -1:  # 不含'.'
+        mod = __import__(module_name[:n], globals(), locals())
+    else:
+        name = module_name[n + 1:]
+        mod = getattr(__import__(
+            module_name[:n], globals(), locals(), [name]), name)
+        # module_name='a.b'则为from a import b
+    for attr in dir(mod):  # list of strings,对于模块则是其所有的attributes
+        if attr.startswith('_'):
+            continue  # 排除以'_'开头的文件
+        fn = getattr(mod, attr)
+        if callable(fn):
+            method = getattr(fn, '__method__', None)
+            path = getattr(fn, '__route__', None)
+            if method and path:
+                add_route(app, fn)
