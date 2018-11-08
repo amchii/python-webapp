@@ -185,7 +185,7 @@ def add_routes(app, module_name: str):
     '''
     n = module_name.rfind('.')
     if n == -1:  # 不含'.'
-        mod = __import__(module_name[:n], globals(), locals())
+        mod = __import__(module_name, globals(), locals())
     else:
         name = module_name[n + 1:]
         mod = getattr(__import__(
