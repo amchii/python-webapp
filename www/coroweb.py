@@ -177,6 +177,7 @@ def add_route(app, fn):
         logging.info('add route %s %s => %s(%s)' % (
             method, path, fn.__name__, ', '.join(inspect.signature(fn).parameters.keys())))
         app.router.add_route(method, path, RequestHandler(app, fn))
+        #RequestHandler(app,fn)作为函数传递通过RequestHandler(app,fn)(request)调用__call__(request)
 
 
 def add_routes(app, module_name: str):
@@ -185,7 +186,7 @@ def add_routes(app, module_name: str):
     '''
     n = module_name.rfind('.')
     if n == -1:  # 不含'.'
-        mod = __import__(module_name[:n], globals(), locals())
+        mod = __import__(module_name, globals(), locals())
     else:
         name = module_name[n + 1:]
         mod = getattr(__import__(
