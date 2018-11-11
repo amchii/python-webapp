@@ -178,6 +178,7 @@ def add_route(app, fn):
             method, path, fn.__name__, ', '.join(inspect.signature(fn).parameters.keys())))
         app.router.add_route(method, path, RequestHandler(app, fn))
         #RequestHandler(app,fn)作为函数传递通过RequestHandler(app,fn)(request)调用__call__(request)
+        #request参数是如何传递给url处理函数的？https://yq.aliyun.com/ziliao/25438
 
 
 def add_routes(app, module_name: str):
