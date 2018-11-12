@@ -80,7 +80,7 @@ async def data_factory(app, handler):
     return parse_data
 
 
-async def response_factory(app, handler):
+async def response_factory(app, handler):#将handler函数返回值转换为web.Response
     async def response(request):
         logging.info('Response handler...')
         r = await handler(request)
@@ -121,8 +121,8 @@ async def response_factory(app, handler):
     return response
 
 
-def index(request):
-    return web.Response(body=b'<h1>Awesome</h1>', content_type='text/html')
+# def index(request):
+    # return web.Response(body=b'<h1>Awesome</h1>', content_type='text/html')
 
 
 async def init(loop):
@@ -130,7 +130,7 @@ async def init(loop):
     # await orm.create_pool(loop=loop,port=3306,user='root',password=)
     app = web.Application(loop=loop, middlewares=[
         logger_factory, response_factory
-    ])
+    ])#middleware作为中间件函数会对url处理函数的返回值进行处理
     init_jinja2(app, filters=dict(datetime=datetime_filter))
     # add_routes(app, 'ig_test_view')
     add_routes(app, 'handlers')
