@@ -15,6 +15,8 @@ from jinja2 import Environment, FileSystemLoader
 
 import orm
 from coroweb import add_routes, add_static
+from config import configs
+# from config_default import configs
 
 
 def init_jinja2(app, **kw):
@@ -80,7 +82,7 @@ async def data_factory(app, handler):
     return parse_data
 
 
-async def response_factory(app, handler):#将handler函数返回值转换为web.Response
+async def response_factory(app, handler):  # 将handler函数返回值转换为web.Response
     async def response(request):
         logging.info('Response handler...')
         r = await handler(request)
@@ -126,11 +128,11 @@ async def response_factory(app, handler):#将handler函数返回值转换为web.
 
 
 async def init(loop):
-    await orm.create_pool(loop=loop, host='127.0.0.1', port=3306, user='root', password='123456', db='web_app')
-    # await orm.create_pool(loop=loop,port=3306,user='root',password=)
+    # await orm.create_pool(loop=loop, host='127.0.0.1', port=3306, user='root', password='123456', db='web_app')
+    await orm.create_pool(loop=loop, **configs['db'])#可用**configs.db，pylint无法检查会报error
     app = web.Application(loop=loop, middlewares=[
         logger_factory, response_factory
-    ])#middleware作为中间件函数会对url处理函数的返回值进行处理
+    ])  # middleware作为中间件函数会对url处理函数的返回值进行处理
     init_jinja2(app, filters=dict(datetime=datetime_filter))
     # add_routes(app, 'ig_test_view')
     add_routes(app, 'handlers')

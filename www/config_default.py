@@ -7,7 +7,7 @@ configs = {
         'port': 3306,
         'user': 'root',
         'password': '123456',
-        'database': 'web_app'
+        'db': 'web_app'
     },
     'session': {
         'secret': 'AwEsOmE'
