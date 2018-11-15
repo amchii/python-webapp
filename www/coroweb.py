@@ -177,7 +177,7 @@ def add_route(app, fn):
         logging.info('add route %s %s => %s(%s)' % (
             method, path, fn.__name__, ', '.join(inspect.signature(fn).parameters.keys())))
         app.router.add_route(method, path, RequestHandler(app, fn))
-        #RequestHandler(app,fn)作为函数传递通过RequestHandler(app,fn)(request)调用__call__(request)
+        #RequestHandler(app,fn)作为handler传递给app，app生成request通过RequestHandler(app,fn)(request)调用__call__(request)
         #request参数是如何传递给url处理函数的？https://yq.aliyun.com/ziliao/25438
 
 
@@ -197,7 +197,7 @@ def add_routes(app, module_name: str):
         if attr.startswith('_'):
             continue  # 排除以'_'开头的文件
         fn = getattr(mod, attr)
-        if callable(fn):
+        if callable(fn):#find url handler
             method = getattr(fn, '__method__', None)
             path = getattr(fn, '__route__', None)
             if method and path:
