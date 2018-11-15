@@ -92,7 +92,7 @@ def signin():
 @get('/signout')
 def signout(request):
     referer = request.headers.get('Referer')
-    r = web.HTTPFound(referer or '/')
+    r = web.HTTPFound(referer or '/')#HTTP状态码302，重定向至指定路径
     r.set_cookie(COOKIE_NAME, '-deleted-', max_age=0, httponly=True)
     logging.info('user signout.')
     return r
@@ -154,3 +154,8 @@ async def api_register_user(*, email, name, passwd):
     r.content_type = 'application/json'
     r.body = json.dumps(user, ensure_ascii=True).encode('utf-8')
     return r
+
+
+# @get('/test')
+# def test(request):
+#     return web.HTTPFound('/signin')

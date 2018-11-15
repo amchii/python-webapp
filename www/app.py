@@ -80,7 +80,7 @@ async def auth_factory(app, handler):
             user = await cookie2user(cookie_str)
             if user:
                 logging.info('set current user:%s' % user.email)
-                request.__user__ = user
+                request.__user__ = user#将user对象传给request.__user__
         if request.path.startswith('/manage/') and (request.__user__ is None or not request.__user__.admin):
             return web.HTTPFound('/signin')
         return (await handler(request))
