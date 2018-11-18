@@ -12,12 +12,17 @@ import base64
 from coroweb import get, post
 from models import User, Blog, Comment, next_id
 from config import configs
-from apis import APIError, APIValueError, APIResourceNotFoundError
+from apis import APIError, APIValueError, APIResourceNotFoundError, APIPermissionError
 from aiohttp import web
 
 
 COOKIE_NAME = 'awesession'
 _COOKIE_KEY = configs.session.secret
+
+
+def check_admin(request):
+    if request.__user__ is None or not request.__user__.admin:
+        raise APIPermissionError()
 
 
 def user2cookie(user, max_age):
@@ -92,10 +97,18 @@ def signin():
 @get('/signout')
 def signout(request):
     referer = request.headers.get('Referer')
-    r = web.HTTPFound(referer or '/')#HTTP状态码302，重定向至指定路径
+    r = web.HTTPFound(referer or '/')  # HTTP状态码302，重定向至指定路径
     r.set_cookie(COOKIE_NAME, '-deleted-', max_age=0, httponly=True)
     logging.info('user signout.')
     return r
+
+@get('/manage/blogs/create')
+def manage_create_blog():
+    return {
+        '__template__':'manage_blog_edit.html',
+        'id':'',
+        'action':'/api/blogs'
+    }
 
 
 @post('/api/authenticate')
@@ -154,6 +167,21 @@ async def api_register_user(*, email, name, passwd):
     r.content_type = 'application/json'
     r.body = json.dumps(user, ensure_ascii=True).encode('utf-8')
     return r
+
+
+@post('/api/blogs')
+async def api_create_blog(request, *, name, summary, content):
+    check_admin(request)
+    if not name.strip():
+        raise APIValueError('name', 'name can not be empty.')
+    if not summary.strip():
+        raise APIValueError('summary', 'summary can not be empty.')
+    if not content.strip():
+        raise APIValueError('content', 'content can not be empty.')
+    blog = Blog(user_id=request.__user__.id, user_name=request.__user__.name, user_image=request
+                .__user__.image, name=name.strip(), summary=summary.strip(), content=content)
+    await blog.save()
+    return blog
 
 
 # @get('/test')
