@@ -46,8 +46,8 @@ def get_required_kw_args(fn):
     # 返回fn的参数列表，见inspect.signature.md示例
     params = inspect.signature(fn).parameters
     for name, param in params.items():
-        if param.kind == inspect.Parameter.KEYWORD_ONLY or param.default == inspect.Parameter.empty:
-            # 如果参数类型是命名关键字参数或者缺省值为空
+        if param.kind == inspect.Parameter.KEYWORD_ONLY and param.default == inspect.Parameter.empty:
+            # 如果参数类型是命名关键字参数并且缺省值为空
             args.append(name)
     return tuple(args)
 
