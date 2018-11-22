@@ -8,7 +8,8 @@ import asyncio
 import re
 import hashlib
 import base64
-import markdown2
+# import markdown
+import mistune
 
 from coroweb import get, post
 from models import User, Blog, Comment, next_id
@@ -214,7 +215,9 @@ async def get_blog(id):
     comments = await Comment.findAll('blog_id=?', [id], orderBy='created_at desc')
     for c in comments:
         c.html_content = text2html(c.content)
-    blog.html_content = markdown2.markdown(blog.content)
+    # blog.html_content = markdown.markdown(blog.content, extensions=[
+    #     'markdown.extensions.extra', 'markdown.extensions.codehilite', 'markdown.extensions.toc', 'markdown.extensions.tables', ])
+    blog.html_content=mistune.markdown(blog.content)
     return {
         '__template__': 'blog.html',
         'blog': blog,
