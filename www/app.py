@@ -105,7 +105,7 @@ async def response_factory(app, handler):  # 将handler函数返回值转换为w
     async def response(request):
         logging.info('Response handler...')
         r = await handler(request)
-        logging.info('response result = %s' % str(r))
+        logging.info('response result = %s ...' % str(r)[:400])#最多输出前400个字符防止崩溃
         if isinstance(r, web.StreamResponse):  # StreamResponse是所有Response对象的父类
             return r
         if isinstance(r, bytes):
