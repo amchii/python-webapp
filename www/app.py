@@ -158,12 +158,13 @@ async def init(loop):
     # add_routes(app, 'ig_test_view')
     add_routes(app, 'handlers')
     add_static(app)
-    # app = web.Application(loop=loop)
-    # app.router.add_route('GET', '/', index)
-    srv = await loop.create_server(app.make_handler(), '127.0.0.1', 9000)
-    logging.info('server started at http://127.0.0.1:9000...')
-    return srv
+    # srv = await loop.create_server(app.make_handler(), '127.0.0.1', 9000)
+    # logging.info('server started at http://127.0.0.1:9000...')
+    # return srv
+    return app
 
 loop = asyncio.get_event_loop()
-loop.run_until_complete(init(loop))
-loop.run_forever()
+# loop.run_until_complete(init(loop))
+# loop.run_forever()
+app=loop.run_until_complete(init(loop))
+web.run_app(app,host='127.0.0.1',port=9000)
