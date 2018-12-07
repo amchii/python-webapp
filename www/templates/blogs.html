@@ -24,7 +24,22 @@
     </div>
 
     <div class="uk-width-medium-1-4">
-        <div class="uk-panel uk-panel-header">
+        {% if __user__ %}
+            <div class="uk-panel uk-panel-box">
+                <div class="uk-text-center">
+                    <img class="uk-border-circle" width="120" height="120" src="{{ __user__.image }}">
+                    <h3>{{ __user__.name }}</h3>
+                </div>
+            </div>
+        {% else %}
+            <div class="uk-panel uk-panel-box">
+                <div class="uk-text-center">
+                    <img class="uk-border-circle" width="120" height="120" src="http://www.gravatar.com/avatar/46cb188013abd2c6ac05585ccca25e89?d=mm&s=120">
+                    <h3>Exmlyshy</h3>
+                </div>
+            </div>
+        {% endif %}
+        <!-- <div class="uk-panel uk-panel-header">
             <h3 class="uk-panel-title">友情链接</h3>
             <ul class="uk-list uk-list-line">
                 <li><i class="uk-icon-thumbs-o-up"></i> <a target="_blank" href="http://www.liaoxuefeng.com/category/0013738748415562fee26e070fa4664ad926c8e30146c67000">编程</a></li>
@@ -32,7 +47,7 @@
                 <li><i class="uk-icon-thumbs-o-up"></i> <a target="_blank" href="http://www.liaoxuefeng.com/wiki/001374738125095c955c1e6d8bb493182103fac9270762a000">Python教程</a></li>
                 <li><i class="uk-icon-thumbs-o-up"></i> <a target="_blank" href="http://www.liaoxuefeng.com/wiki/0013739516305929606dd18361248578c67b8067c8c017b000">Git教程</a></li>
             </ul>
-        </div>
+        </div> -->
     </div>
 
 {% endblock %}
