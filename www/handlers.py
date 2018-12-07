@@ -100,7 +100,7 @@ async def cookie2user(cookie_str):
 async def index(*, page='1'):
     page_index = get_page_index(page)
     num = await Blog.findNumber('id')
-    page = Page(num, page_index)
+    page = Page(num, page_index, page_size=5)
     if num == 0:
         blogs = []
     else:
@@ -110,6 +110,15 @@ async def index(*, page='1'):
         'page': page,
         'blogs': blogs
     }
+
+@get('/favicon.ico')
+async def favicon():
+    with open('favicon.ico','rb') as f:
+        data=f.read()
+    r=web.Response()
+    r.content_type='image/x-icon'
+    r.body=data
+    return r
 
 
 @get('/register')
@@ -217,7 +226,7 @@ async def get_blog(id):
         c.html_content = text2html(c.content)
     # blog.html_content = markdown.markdown(blog.content, extensions=[
     #     'markdown.extensions.extra', 'markdown.extensions.codehilite', 'markdown.extensions.toc', 'markdown.extensions.tables', ])
-    blog.html_content=mistune.markdown(blog.content)
+    blog.html_content = mistune.markdown(blog.content)
     return {
         '__template__': 'blog.html',
         'blog': blog,
