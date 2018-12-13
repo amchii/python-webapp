@@ -50,16 +50,16 @@ def init_jinja2(app, **kw):
 
 def datetime_filter(t):
     delta = int(time.time() - t)
-    if delta < 60:
-        return u'1分钟前'
-    if delta < 3600:
-        return u'%s分钟前' % (delta // 60)
-    if delta < 86400:
-        return u'%s小时前' % (delta // 3600)
-    if delta < 604800:
-        return u'%s天前' % (delta // 86400)
+    # if delta < 60:
+    #     return u'1分钟前'
+    # if delta < 3600:
+    #     return u'%s分钟前' % (delta // 60)
+    # if delta < 86400:
+    #     return u'%s小时前' % (delta // 3600)
+    # if delta < 604800:
+    #     return u'%s天前' % (delta // 86400)
     dt = datetime.fromtimestamp(t)
-    return u'%s年%s月%s日' % (dt.year, dt.month, dt.day)
+    return u'%s年%s月%s日%s时' % (dt.year, dt.month, dt.day, dt.hour)
 
 # 类似于装饰器
 
@@ -105,7 +105,8 @@ async def response_factory(app, handler):  # 将handler函数返回值转换为w
     async def response(request):
         logging.info('Response handler...')
         r = await handler(request)
-        logging.info('response result = %s ...' % str(r)[:400])#最多输出前400个字符防止崩溃
+        logging.info('response result = %s ...' %
+                     str(r)[:400])  # 最多输出前400个字符防止崩溃
         if isinstance(r, web.StreamResponse):  # StreamResponse是所有Response对象的父类
             return r
         if isinstance(r, bytes):
@@ -166,5 +167,5 @@ async def init(loop):
 loop = asyncio.get_event_loop()
 # loop.run_until_complete(init(loop))
 # loop.run_forever()
-app=loop.run_until_complete(init(loop))
-web.run_app(app,host='127.0.0.1',port=9000)
+app = loop.run_until_complete(init(loop))
+web.run_app(app, host='127.0.0.1', port=9000)
