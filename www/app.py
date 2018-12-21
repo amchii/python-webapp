@@ -159,13 +159,30 @@ async def init(loop):
     # add_routes(app, 'ig_test_view')
     add_routes(app, 'handlers')
     add_static(app)
+    '''
+    下面的注释掉的部分为不建议的写法
+    
     # srv = await loop.create_server(app.make_handler(), '127.0.0.1', 9000)
     # logging.info('server started at http://127.0.0.1:9000...')
     # return srv
+    在main()中：
+    # loop = asyncio.get_event_loop()
+    # loop.run_until_complete(init(loop))
+    # loop.run_forever()
+    '''
+
     return app
 
-loop = asyncio.get_event_loop()
-# loop.run_until_complete(init(loop))
-# loop.run_forever()
-app = loop.run_until_complete(init(loop))
-web.run_app(app, host='127.0.0.1', port=9000)
+if __name__ == '__main__':
+    '''
+    对于本app中所有loop参数,无论是aiomysql.create_pool()中
+    还是web.Application()中loop为None时都为asyncio.get_event_loop()
+    在aiohttp中有代码：
+    if loop is not None:
+            warnings.warn("loop argument is deprecated", DeprecationWarning,
+                          stacklevel=2)
+    可见loop参数是不建议的
+    '''
+    loop = asyncio.get_event_loop()
+    app = loop.run_until_complete(init(loop)) #返回init(loop)的返回结果
+    web.run_app(app, host='127.0.0.1', port=9000)

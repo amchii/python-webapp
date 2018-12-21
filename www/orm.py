@@ -10,7 +10,7 @@ def log(sql, args=()):
     logging.info('SQL: %s' % sql)
 
 
-async def create_pool(loop, **kw):
+async def create_pool(loop, **kw): #pool为None时会默认为asyncio.get_event_loop()
     logging.info('create database connection pool...')
     global __pool
     __pool = await aiomysql.create_pool(
